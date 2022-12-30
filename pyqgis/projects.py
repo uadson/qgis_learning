@@ -1,55 +1,65 @@
+import qgis.core as qgis
+from pathlib import Path, PureWindowsPath
+
+
 # creating a project instance
-project = QgsProject.instance()
+project = qgis.QgsProject.instance()
+print(project)
 
-# Reading the project path
-print(project.read(r'/mnt/DADOS/repos/qgis/qgis_learning/pyqgis/projects/exemplo.qgz')
+# reading the project path
+## base directory
+BASE_DIR = Path(__file__).resolve().parent
 
-# Getting the project name
+## projects directory within base
+projects = PureWindowsPath(BASE_DIR).joinpath('projects')
+file = PureWindowsPath(projects).joinpath('exemplo.qgz')
+new_file = PureWindowsPath(projects).joinpath('new_file.qgz')
+
+# reading and open file project
+print(project.read(str(file)))
+
+# getting the project name
 print(project.fileName())
 
-# Getting the absolute project path
+# getting the absolute project path
 print(project.absolutePath())
 
-# Getting the absolute file project path
+# getting the absolute file project path
 print(project.absoluteFilePath())
 
-# Getting Coordinate Reference System- CRS
-project.crs()
+# getting coordinate reference system - CRS
+print(project.crs())
 
-# Setting Coordinate Reference System
-project.setCrs(QgsCoordinateReferenceSystem("EPSG:4674"))
+# setting coordinate reference system
+project.setCrs(qgis.QgsCoordinateReferenceSystem("EPSG:4674"))
+print(project.crs())
 
-# Saving the project - two ways
-# 1 - Overwrite
+# saving the project - two ways
+## 1 - Overwrite
 project.write(project.absoluteFilePath())
 
-# 2 - A new project
-project.write(r'/mnt/DADOS/repos/qgis/qgis_learning/pyqgis/projects/new_example.qgz')
+## 2 - As a new project
+project.write(str(new_file))
 
+# amout layers
+print(project.count())
+
+# project title
+print(project.title())
+
+title = 'PyQgis Course'
+project.setTitle(title)
+print(project.title())
+
+# ellipsoid
+print(project.ellipsoid())
+
+print(project.lastModified())
+
+"""
 # Setting background color
 project.setBackgroundColor(QColor(51, 153, 255))
 
 # Coming the color
 project.setBackgroundColor(QColor(255, 255, 255))
-
-# Amount layers
-project.count() 
-# return 0 for this project
-
-# Getting or defing the project title
-project.title()
-
-title = 'PyQgis Course'
-project.setTitle(title)
-project.title()
-
-# Getting the ellipsoid
-project.ellipsoid()
-# return 'EPSG:7030'
-
-# Getting last modified
-project.lastModified()
-# return PyQt5.QtCore.QDateTime(2022, 12, 23, 18, 28, 43, 251)
-
-# Loading script
-print(project)
+"""

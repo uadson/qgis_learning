@@ -1,3 +1,5 @@
-# Enviroment
-/.venv
-.venv
+/data/
+data/
+/geoscript/
+geoscript/
+.idea/
