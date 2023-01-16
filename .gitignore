@@ -3,3 +3,4 @@ data/
 /geoscript/
 geoscript/
 .idea/
+.venv/
