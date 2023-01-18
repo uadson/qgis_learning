@@ -1,6 +1,13 @@
+# directories
 /data/
 data/
 /geoscript/
 geoscript/
+
+# enviroments
 .idea/
 .venv/
+.vscode/
+
+# jupyter files
+.ipynb_checkpoints
