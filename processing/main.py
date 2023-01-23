@@ -13,7 +13,13 @@ sys.path.insert(0, os.path.join(BASE_DIR, DIR))
 sys.path.insert(1, funct_path)
 
 
-from functions import reproject_layers
+from functions import reproject_layers, apply_filter, aero_alert
 
 
 reproject_layers(path, 5880, 'layers', 'shp')
+
+rep_layers_path = os.path.join(path, '5880_layers/')
+
+apply_filter(rep_layers_path, 5880, 'aeroportos', 'go', 'shp')
+
+aero_alert(rep_layers_path, 'aeroportos', 'chuva', 'shp')

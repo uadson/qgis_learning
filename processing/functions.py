@@ -46,6 +46,24 @@ def get_files(path:str, ext:str) -> list():
 		return f"{error}"
 
 
+def open_vector_layers(path:str, extension:str) -> dict():
+	"""
+		Choose a default file location path;
+		Selects files according to their extension;
+		Adds the files to qgis through the addMapLayer() function;
+		Populates a dictionary with the objects created on the canvas;
+		Returns the dictionary, which can be stored in a variable and will be iterable.
+	"""
+	files = get_files(path, extension)
+	objects = {}
+	for file in files:
+		filename = file.split('.')[0]
+		layer = QgsVectorLayer(path+file, filename, "ogr")
+		obj = QgsProject.instance().addMapLayer(layer)
+		objects.update({filename:obj})
+	return objects
+
+
 def reproject_layers(path, espg, new_dir, layer_ext):
 	makedir(path, espg, new_dir)
 	for file in get_files(path, layer_ext):
@@ -62,6 +80,57 @@ def reproject_layers(path, espg, new_dir, layer_ext):
 				}
 			)
 	return
+
+
+def apply_filter(path:str, espg:int, layer_name:str, state:str, ext:str):
+	"""
+		Filter objects by State
+
+		:path      : files path
+		:layer_name: the layer name
+		:state     : the name state
+		:espg      : ESPG code
+		:ext       : file extension
+	"""
+	state = state.upper()
+	layer = open_vector_layers(path, ext)
+	if espg != 0:
+		layer_name = f"{espg}_{layer_name}.{ext}"
+
+	return layer[layer_name[0:-4]].setSubsetString(f"uf = '{state}'")
+
+
+def aero_alert(path, layer_name, weather, ext):
+
+	layer = open_vector_layers(path, ext)
+
+	layer_name = f"5880_{layer_name}.{ext}"
+
+	if not ext.startswith('.'):
+		ext = f".{ext}"
+
+	if weather == 'seco':
+		buffer = 200
+	elif weather == 'chuva':
+		buffer = 1000
+	else:
+		buffer = 3000
+
+	output_path = os.path.join(path, f"buffer.{ext}")
+
+	processing.run(
+			"native:buffer",
+			{
+				'INPUT': layer[layer_name[0:-4]],
+				'DISTANCE': buffer,
+				'SEGMENTS': 5,
+				'END_CAP_STYLE': 0,
+				'JOIN_STYLE': 0,
+				'MITER_LIMIT': 2,
+				'DISSOLVE': True,
+				'OUTPUT': output_path
+			}
+		)
 
 
 reproject_layers(path, 5880, 'layers', 'shp')
