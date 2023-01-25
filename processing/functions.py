@@ -2,6 +2,7 @@ import os
 
 import processing
 
+import qgis.utils
 from qgis.core import *
 
 BASE_DIR = os.getcwd()
@@ -82,7 +83,7 @@ def reproject_layers(path, espg, new_dir, layer_ext):
 	return
 
 
-def apply_filter(path:str, espg:int, layer_name:str, state:str, ext:str):
+def apply_filter(path:str, espg:int, layer, layer_name:str, state:str, ext:str):
 	"""
 		Filter objects by State
 
@@ -92,45 +93,48 @@ def apply_filter(path:str, espg:int, layer_name:str, state:str, ext:str):
 		:espg      : ESPG code
 		:ext       : file extension
 	"""
-	state = state.upper()
-	layer = open_vector_layers(path, ext)
 	if espg != 0:
-		layer_name = f"{espg}_{layer_name}.{ext}"
+		layer_name = f"{espg}_{layer_name}{ext}"
 
 	return layer[layer_name[0:-4]].setSubsetString(f"uf = '{state}'")
 
 
-def aero_alert(path, layer_name, weather, ext):
+def aero_alert(path:str, espg:int, layer_name:str, state:str, weather:str, ext:str):
 
-	layer = open_vector_layers(path, ext)
-
-	layer_name = f"5880_{layer_name}.{ext}"
+	state = state.upper()
 
 	if not ext.startswith('.'):
 		ext = f".{ext}"
+	
+	layer = open_vector_layers(path, ext)
+
+	apply_filter(path, espg, layer, layer_name, state, ext)
+
+	if espg != 0:
+		layer_name = f"{espg}_{layer_name}{ext}"
 
 	if weather == 'seco':
-		buffer = 200
+		buffer = 0.1
 	elif weather == 'chuva':
-		buffer = 1000
+		buffer = 0.5
 	else:
-		buffer = 3000
+		buffer = 1
 
-	output_path = os.path.join(path, f"buffer.{ext}")
+	output_path = os.path.join(path, f"buffer{ext}")
 
 	processing.run(
 			"native:buffer",
 			{
-				'INPUT': layer[layer_name[0:-4]],
-				'DISTANCE': buffer,
-				'SEGMENTS': 5,
-				'END_CAP_STYLE': 0,
-				'JOIN_STYLE': 0,
-				'MITER_LIMIT': 2,
-				'DISSOLVE': True,
-				'OUTPUT': output_path
+				'INPUT':layer[layer_name[0:-4]],
+				'DISTANCE':buffer,
+				'SEGMENTS':5,
+				'END_CAP_STYLE':0,
+				'JOIN_STYLE':0,
+				'MITER_LIMIT':2,
+				'DISSOLVE':True,
+				'OUTPUT':output_path
 			}
 		)
-
-
-reproject_layers(path, 5880, 'layers', 'shp')
+	obj = QgsVectorLayer(str(output_path), "analise", "ogr")
+	QgsProject.instance().addMapLayer(obj)
+	return 

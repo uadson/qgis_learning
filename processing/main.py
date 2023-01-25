@@ -20,6 +20,4 @@ reproject_layers(path, 5880, 'layers', 'shp')
 
 rep_layers_path = os.path.join(path, '5880_layers/')
 
-apply_filter(rep_layers_path, 5880, 'aeroportos', 'go', 'shp')
-
-aero_alert(rep_layers_path, 'aeroportos', 'chuva', 'shp')
+aero_alert(rep_layers_path, 5880, 'aeroportos', 'go', 'seco', 'shp')
